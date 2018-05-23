@@ -31,8 +31,9 @@ DataAccessObject.create = function (data, options, cb) {
   return _create.apply(this, [].slice.call(arguments));
 }
 
-const _upsert = DataAccessObject.upsert;
-DataAccessObject.updateOrCreate = DataAccessObject.upsert = function upsert(data, options, cb) {
+const _replaceOrCreate = DataAccessObject.replaceOrCreate;
+DataAccessObject.replaceOrCreate = DataAccessObject.updateOrCreate = DataAccessObject.upsert = 
+function upsert(data, options, cb) {
   var self=this;
   var d = implicitComposite.getChildDataAndRelations(self, data);
   // Atul : if nested data exist, fall in to this if and create records recursively for nested child
@@ -47,7 +48,7 @@ DataAccessObject.updateOrCreate = DataAccessObject.upsert = function upsert(data
   }
 
   // call original create function
-  return _upsert.apply(this, [].slice.call(arguments));
+  return _replaceOrCreate.apply(this, [].slice.call(arguments));
 }
 
 const _updateAttributes = DataAccessObject.prototype.updateAttributes;

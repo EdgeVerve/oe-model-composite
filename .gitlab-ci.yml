@@ -22,7 +22,6 @@ npminstall:
     - exit_status=0
     - npm set progress=false
     - time npm install eslint babel-eslint --no-optional
-    - eslint --version
     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
@@ -69,8 +68,6 @@ postgrestest:
     - npm run grunt-cover
   tags:
     - CEP_RUNNER    
-  tags:
-    - CEP_RUNNER
     
 oracletest:
   stage: pre-build-test

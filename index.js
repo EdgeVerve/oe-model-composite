@@ -58,8 +58,8 @@ DataAccessObject.replaceOrCreate = function replaceOrCreate(data, options, cb) {
   return _replaceOrCreate.apply(this, [].slice.call(arguments));
 };
 
-const _replaceById = DataAccessObject.prototype.replaceById;
-DataAccessObject.prototype.replaceById = function replaceById(data, options, cb) {
+const _replaceById = DataAccessObject.replaceById;
+DataAccessObject.replaceById = function replaceById(id, data, options, cb) {
   var self = this;
 
   var d = utils.getChildDataAndRelations(self, data);

@@ -5,6 +5,15 @@
  *
  */
 
+var wrapper = require('./lib/wrapper.js');
+// const log = require('oe-logger')('oe-model-personalization');
+module.exports = function (app) {
+  wrapper(app);
+  // log.info('Oe model-Personalization Loaded');
+};
+
+
+/*
 const loopback = require('loopback');
 const DataSource = loopback.DataSource;
 const DataAccessObject = DataSource.DataAccessObject;
@@ -13,13 +22,25 @@ const implicitComposite = require('./lib/implicit-composite');
 const explicitComposite = require('./lib/explicit-composite');
 const utils = require('./lib/util');
 
+
+var newProperties = {
+  properties: {
+    'CompositeTransaction': {
+      'type': 'boolean'
+    },
+    'compositeModels': {
+      'type': 'object'
+    }
+  }
+};
+
 const _create = DataAccessObject.create;
 DataAccessObject.create = function (data, options, cb) {
   var self = this;
   var settings = self.definition.settings;
   // Atul : If compositeModel is being posted.. call compositePost() helper
   if (settings.compositeModels) {
-    explicitComposite.compositePost(self, data, options, cb);
+    explicitComposite.execute(self, data, options, cb);
     return data;
   }
 
@@ -78,3 +99,4 @@ DataAccessObject.replaceById = function replaceById(id, data, options, cb) {
 };
 
 
+*/

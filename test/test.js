@@ -1,6 +1,6 @@
 /**
  *
- * ©2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * 2018-2019 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
  *
  */
@@ -722,7 +722,7 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
         function (err, results) {
           expect(results[0].city).to.equal('DELHI_CAPITAL');
           //console.log(results[0]);
-          expect(results[0].CustomerId).to.be.equal(1)
+          expect(results[0].CustomerId.toString()).to.be.equal('1')
           //expect(results[0].customerId === "1" || results[0].customerId === 1).to.be.ok;
           done();
         });

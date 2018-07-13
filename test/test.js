@@ -440,10 +440,10 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
         'name': 'Inside JavaScript'
       }]
     }, {
-      'num': 1,
-      'pageRel': [{
+      'num': 2,
+      'pageRel': {
         'name': 'Inside Java'
-      }]
+      }
     }];
 
     var url = basePath + '/pages?access_token=' + adminToken;
@@ -453,9 +453,24 @@ describe(chalk.blue('Model Personalization Test Started'), function (done) {
     .end(function (err, response) {
       expect(response.status).to.be.equal(200);
       var results = response.body;
-      console.log(results);
-      //expect(results[0].name).to.equal('Tom');
-      //expect(results[1].name).to.equal('Harry');
+
+      expect(results.find(function (item) { return item.num === 1; }).num).to.equal(1);
+      expect(results.find(function (item) { return item.num === 2; }).num).to.equal(2);
+      done();
+    });
+  });
+
+  it('t6-2 retreive data for belongs to relations (HTTP)', function (done) {
+    var url = basePath + '/pages?filter={"include" : "pageRel"}';
+    api.set('Accept', 'application/json')
+    .get(url)
+    .send()
+    .end(function (err, response) {
+      expect(response.status).to.be.equal(200);
+      var results = response.body;
+
+      expect(results.find(function (item) { return (item.num === 1 && item.pageRel.name === "Inside JavaScript"); }).num).to.equal(1);
+      expect(results.find(function (item) { return (item.num === 2 && item.pageRel.name === "Inside Java"); }).num).to.equal(2);
       done();
     });
   });

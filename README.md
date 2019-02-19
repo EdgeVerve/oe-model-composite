@@ -26,10 +26,10 @@
 
 # Introduction
 
-In simple words, Model composition is the ability to treat multiple models together as a single entity. This should allow user to do certain operations on multiple models same as you do on single model. 
+In simple words, Model composition is the ability to treat multiple models together as a single entity. This should allow user to do certain operations on multiple models same as you do on single model.
 It also allows user to combine non related models and do similar operation you do with single model.
 
-There are two types of model composition. Implicit Composite model and Explicit Composite model. 
+There are two types of model composition. Implicit Composite model and Explicit Composite model.
 
 ## Implicit Composite
 Loopback provides a way to relate one or more models using relations. oeCloud.io can use these relations while doing get/post operation to retrieve/save data from/to model. For example, you can get or post data to parent model and it's children in single Web API call.
@@ -49,7 +49,7 @@ In this section, we will see how we can use install this module in your project.
 ## Testing and Code coverage
 
 ```sh
-$ git clone http://evgit/oec-next/oe-model-composite.git
+$ git clone http://evgit/oecloud.io/oe-model-composite.git
 $ cd oe-model-composite
 $ npm install --no-optional
 $ npm run grunt-cover
@@ -63,7 +63,7 @@ To use oe-model-composite in your project, you must include this package into yo
 
 
 ```javascript
-"oe-model-composite": "git+http://evgit/oec-next/oe-model-composite.git#master"
+"oe-model-composite": "git+http://evgit/oecloud.io/oe-model-composite.git#master"
 ```
 
 
@@ -90,9 +90,9 @@ app-list.json
 # Design
 
 
-## Wrapper 
+## Wrapper
 
-This module overrides create, replaceById, updateAttributes etc function of DataAccessObject of loopback-datasource-juggler, Each of these function opens the payload and see if any related model data is present in payload. 
+This module overrides create, replaceById, updateAttributes etc function of DataAccessObject of loopback-datasource-juggler, Each of these function opens the payload and see if any related model data is present in payload.
 If it finds related model data in payload, it executes that first along with actual model payload.
 
 
@@ -100,7 +100,7 @@ If it finds related model data in payload, it executes that first along with act
 
 # Implicit Composite
 
-In example below, you have Customer model and CustomerAddress model as child model of it. As a developer, you can use 
+In example below, you have Customer model and CustomerAddress model as child model of it. As a developer, you can use
 
 ```javascript
 /api/Customers?filter={"include" : "addressRel" }
@@ -111,7 +111,7 @@ Loopback will internally get CustomerAddress records for each Customer record an
 
 The response will looks like below
 
- 
+
 ```javascript
 [
   {
@@ -154,7 +154,7 @@ The response will looks like below
 ```
 
 
-Please note that URL shown above is in decoded format for better understanding. Actual URL will look like 
+Please note that URL shown above is in decoded format for better understanding. Actual URL will look like
 ```
 http://localhost:1444/api/Customers?filter=%7B%22include%22%20%3A%20%22accountsRel%22%20%7D
 ```
@@ -178,7 +178,7 @@ Typically, end user will modify data of parent model and child models records fr
 With plain loopback, browser(or equivalent client application) needs to do 'PUT' request on Customer and 'POST' request on 'CustomerAddress'. Therefore, browser will have to make at least two calls to web Server. If there are more child models, for each update on model, browser has to make PUT or POST.
 
 
-With Implicit Composite models, we can POST an entire model object along with the related model data and execute against the database. 
+With Implicit Composite models, we can POST an entire model object along with the related model data and execute against the database.
 ```
 {
     "id": 3,
@@ -197,7 +197,7 @@ With Implicit Composite models, we can POST an entire model object along with th
 }
 ```
 
-As shown in above example, if you post the data as above, Customer, CustomerAddress and CustomerEmail  - all of these models will be populated with data posted. Relations will be taken into account and hence in actual database, you could see foreign keys being populated in child tables. 
+As shown in above example, if you post the data as above, Customer, CustomerAddress and CustomerEmail  - all of these models will be populated with data posted. Relations will be taken into account and hence in actual database, you could see foreign keys being populated in child tables.
 
 
 ## Implicit Composite for PUT Operation
@@ -277,11 +277,11 @@ If you want to construct home page with all this data from all the models shown 
     {}
   ],
   "relations": {
-  
+
     "addressRel": {
 	  "type": "hasMany",
 	  "model": "CustomerAddress",
-	  "foreignKey": "customerId"  
+	  "foreignKey": "customerId"
 	  }
   },
   "acls": [
@@ -324,7 +324,7 @@ If you want to construct home page with all this data from all the models shown 
 
 * Refresh swagger UI Page so that and see that both of these models appear.
 
-* Post data to Customer model and customerAddress model as shown 
+* Post data to Customer model and customerAddress model as shown
 
 **Customer data**
 ```javascript
@@ -332,7 +332,7 @@ If you want to construct home page with all this data from all the models shown 
 	name : 'john',
 	id: 1
 }
-``` 
+```
 CustomerAddress data - two records posted for customerId : 1
 
 ```javascript
@@ -348,12 +348,12 @@ CustomerAddress data - two records posted for customerId : 1
     "customerId": 1
   }
 ]
-``` 
+```
 * Get data for customer as well as address using single API call
- 
+
 ```javascript
 /api/Customers?filter={"include" : "addressRel" }
-filter : {"include" : "addressRel" } 
+filter : {"include" : "addressRel" }
 ```
 
 above, you can execute by putting {"include" : "addressRel" } in filter section.
@@ -404,7 +404,7 @@ above, you can execute by putting {"include" : "addressRel" } in filter section.
 ]
 ```
 
-Note in above that, with single post, we posted data of customer and addresses. Also tying addresses to customer was implicit. 
+Note in above that, with single post, we posted data of customer and addresses. Also tying addresses to customer was implicit.
 
 ## Step 3 (Test)
 
@@ -452,7 +452,7 @@ filter : {"customerId" : 2 }
 
 ## Step 4 - PUT operation
 
-* You can use PUT operation to update customer record as usual. But implicit composite allows you to post related model data in PUT operation as well. But this time, you need to tell exactly what you want to do with record. 
+* You can use PUT operation to update customer record as usual. But implicit composite allows you to post related model data in PUT operation as well. But this time, you need to tell exactly what you want to do with record.
 
 
 ```javascript
@@ -520,7 +520,7 @@ As far as models are unrelated, you need to make composite model. Composite mode
     "accountRel": {
 	  "type": "hasMany",
 	  "model": "Account",
-	  "foreignKey": "customerId"  
+	  "foreignKey": "customerId"
 	  }
   },
   "acls": [
@@ -556,11 +556,11 @@ As far as models are unrelated, you need to make composite model. Composite mode
     {}
   ],
   "relations": {
-  
+
     "transactionRel": {
 	  "type": "hasMany",
 	  "model": "AccountTransaction",
-	  "foreignKey": "accountId"  
+	  "foreignKey": "accountId"
 	  }
   },
   "acls": [
@@ -806,7 +806,7 @@ Use following data to create model. Post following data to ModelDefinition model
 /get/HomepageModel
 
 ```javascript
-filter = { "Customer" : {"where": {"id" : 1 }, "include" : {"accountRel" : "accountTransactionRel"} }, "Promotions" : { "where" : { "active" : true }}, "UpcomingEvent" : {"where" :{"active" : true } } } 
+filter = { "Customer" : {"where": {"id" : 1 }, "include" : {"accountRel" : "accountTransactionRel"} }, "Promotions" : { "where" : { "active" : true }}, "UpcomingEvent" : {"where" :{"active" : true } } }
 ```
 
 Note the above format of filter. Filter has object with name of Model in composite. For example, above, it has three objects. Customer, Promotions and UpcomingEvents. Each object has got filter which is same as what is supported by loopback. Here, customer object has filter where clause which returns record for customer id : 1. Also include clause to include accountRel and accountTransactionRel. Promotion and UpcomingEvents has filter to ensure active:true records. This will return data of all the models defined in composite.
@@ -963,7 +963,7 @@ This entire operation would run in single transaction and any of that is failed,
 
 ## Step 3 ( Test )
 
-* You should see in mongo database directly and see Customer record is changed 
+* You should see in mongo database directly and see Customer record is changed
 * You should see Account collection of mongo db to see AccountBalance is updated
 * You should see in AccountTransaction collection that new entries are created.
 
@@ -971,7 +971,7 @@ Same you can see by querying following in swagger.
 
 
 ```javascript
-filter = { "Customer" : {"where": {"id" : 1 }, "include" : {"accountRel" : "accountTransactionRel"} }, "Promotions" : { "where" : { "active" : true }}, "UpcomingEvent" : {"where" :{"active" : true } } } 
+filter = { "Customer" : {"where": {"id" : 1 }, "include" : {"accountRel" : "accountTransactionRel"} }, "Promotions" : { "where" : { "active" : true }}, "UpcomingEvent" : {"where" :{"active" : true } } }
 ```
 
 You should not get anything in Promotion and UpcomingEvent model.

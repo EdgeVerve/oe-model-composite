@@ -63,7 +63,7 @@ To use oe-model-composite in your project, you must include this package into yo
 
 
 ```javascript
-"oe-model-composite": "git+http://evgit/oecloud.io/oe-model-composite.git#master"
+"oe-model-composite": "git+http://evgit/oecloud.io/oe-model-composite.git#2.0.0"
 ```
 
 

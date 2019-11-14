@@ -167,6 +167,58 @@ function createBookModels(done) {
   });
 }
 
+function createCustomerEnrollmentModels(done) {
+  models.ModelDefinition.create({
+    "name": "CustomerEnrollment",
+    "description": "customer desc",
+    "plural": "CustomerEnrollments",
+    "base": "BaseEntity",
+    "relations": {
+      "emailRel": {
+        "type": "hasOne",
+        "model": "OfficeEmail",
+        "foreignKey": "customerId"
+      }
+    },
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "city": {
+        "type": "string"
+      }
+    }
+  }, globalCtx, function (err, model) {
+    if (err) {
+      return done(err);
+    }
+    models.ModelDefinition.create({
+      "name": "OfficeEmail",
+      "description": "email desc",
+      "plural": "OfficeEmails",
+      "base": "BaseEntity",
+      "relations": {
+        "emailRel": {
+          "type": "belongsTo",
+          "model": "CustomerEnrollment",
+          "foreignKey": "customerId"
+        }
+      },
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    }, globalCtx, function (err2, model2) {
+      expect(err2).to.be.not.ok;
+      done(err2);
+    });
+  });
+}
+
 describe(chalk.blue('Composite Model Test Started'), function (done) {
   this.timeout(10000);
   before('wait for boot scripts to complete', function (done) {
@@ -738,11 +790,49 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
       return done();
     });
   });
+  
+   it('t7-8 create CustomerEnrollment models tenant', function (done) {
+    createCustomerEnrollmentModels(done);
+  });
+  
+  it('t7-9 should insert data in Customer Enrollment Model successfully', function (done) {
+    var customerEnrollmentModel = loopback.getModel('CustomerEnrollment', globalCtx);
+    customerEnrollmentModel.create({
+      "name": "Prisi",
+      "city": "Patna",
+      "id": 1,
+      "emailRel":
+      {
+        "username": "pri1",
+        "password": "pri1"
+      }
+    },
+      globalCtx, function (err, results) {
+        expect(err).to.be.null;
+        done();
+      });
+  });
+
+  it('t7-10 should fail to insert data in Customer Enrollment Model', function (done) {
+    var customerEnrollmentModel = loopback.getModel('CustomerEnrollment', globalCtx);
+    customerEnrollmentModel.create({
+      "name": "Atul",
+      "city": "Ranchi",
+      "id": 2,
+      "emailRel": [
+        {
+          "username": "kAtul_1",
+          "password": "ArunArun"
+        },
+        {
+          "username": "kAtul_2",
+          "password": "ArunArun"
+        }]
+    },
+      globalCtx, function (err, results) {
+        expect(err).not.to.be.null;
+        done();
+      });
+  });
 
 });
-
-
-
-
-
-

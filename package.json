@@ -1,6 +1,6 @@
 {
   "name": "oe-model-composite",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "oe-cloud modularization project aka oecloud.io",
   "engines": {
     "node": ">=6"
@@ -23,7 +23,7 @@
     "chai-things": "0.2.0",
     "chalk": "1.1.1",
     "eslint": "4.10.0",
-    "grunt": "1.0.3",
+    "grunt": "1.0.4",
     "grunt-banner": "0.6.0",
     "grunt-cli": "1.3.2",
     "grunt-contrib-clean": "2.0.0",
@@ -37,13 +37,13 @@
     "superagent-defaults": "0.1.14",
     "supertest": "3.4.2",
     "loopback-connector-mongodb": "3.9.2",
-    "oe-cloud": "2.0.0",
-    "oe-connector-postgresql": "2.0.0"
+    "oe-cloud": "^2.0.0",
+    "oe-connector-postgresql": "^2.0.0"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/EdgeVerve/oe-model-composite.git"
   },
-  "author" : "Atul Pandit",
+  "author": "Atul Pandit",
   "license": "MIT"
 }

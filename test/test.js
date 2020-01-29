@@ -380,7 +380,18 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
         expect(result[0].address.find(function (item) {
           return (item.city === 'delhi modified');
         }).city).to.equal('delhi modified');
-        return done();
+
+        Customer.replaceOrCreate({name:"Smith", age: 40, id : "Smith", address : [{city : "SmithTown"}]}, function(err, inst){
+          if(err){
+            return done(err);
+          }
+          expect(inst.name).to.be.equal("Smith");
+          return done();
+        });
+
+
+
+        //return done();
       });
   });
 
@@ -774,7 +785,7 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
     compositeModel.find({}, globalCtx, function (err, results) {
       // expect(results[0].city).to.equal('DELHI_CAPITAL');
       // console.log(results);
-      expect(results.Customer.length).to.be.equal(4);
+      expect(results.Customer.length).to.be.equal(5);
       expect(results.UpcomingEvent.length).to.be.equal(2);
       return done();
     });

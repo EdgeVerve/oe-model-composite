@@ -40,6 +40,10 @@ var url = basePath + '/Employees';
 
 var models = oecloud.models;
 
+var empId;
+var empAddId;
+var empName;
+
 function deleteAllUsers(done) {
   var userModel = loopback.findModel('User');
   userModel.destroyAll({}, {}, function (err) {
@@ -112,6 +116,9 @@ function createEmployeeModels(done) {
         'city': {
           'type': 'string',
           'required': true
+        },
+        'country': {
+          'type': 'string'
         }
       },
       'relations': {}
@@ -218,6 +225,11 @@ function createCustomerEnrollmentModels(done) {
   });
 }
 
+function isTransactionSupported() {
+  var usermodel = loopback.findModel('User');
+  return (typeof usermodel.dataSource.connector.beginTransaction) === 'function';
+}
+
 describe(chalk.blue('Composite Model Test Started'), function (done) {
   this.timeout(10000);
   before('wait for boot scripts to complete', function (done) {
@@ -238,9 +250,9 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
     api.set('Accept', 'application/json')
       .post(url)
       .send([{ username: 'admin', password: 'admin', email: 'admin@admin.com' },
-        { username: 'evuser', password: 'evuser', email: 'evuser@evuser.com' },
-        { username: 'infyuser', password: 'infyuser', email: 'infyuser@infyuser.com' },
-        { username: 'bpouser', password: 'bpouser', email: 'bpouser@bpouser.com' }
+      { username: 'evuser', password: 'evuser', email: 'evuser@evuser.com' },
+      { username: 'infyuser', password: 'infyuser', email: 'infyuser@infyuser.com' },
+      { username: 'bpouser', password: 'bpouser', email: 'bpouser@bpouser.com' }
       ])
       .end(function (err, response) {
         var result = response.body;
@@ -275,7 +287,7 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
 
   it('t3-1 clean up Customer models', function (done) {
     Customer.destroyAll({}, {}, function (err) {
-      if (err) {return done(err);}
+      if (err) { return done(err); }
       var CustomerAddress = loopback.getModel('CustomerAddress', defaultContext);
       CustomerAddress.destroyAll({}, {}, function (err) {
         return done(err);
@@ -286,7 +298,190 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
   it('t3-2 clean up Employee models', function (done) {
     var Employee = loopback.getModel('Employee', defaultContext);
     Employee.destroyAll({}, { ignoreAutoScope: true }, function (err) {
-      if (err) {return done(err);}
+      if (err) { return done(err); }
+      var EmployeeAddress = loopback.getModel('EmployeeAddress', defaultContext);
+      EmployeeAddress.destroyAll({}, { ignoreAutoScope: true }, function (err) {
+        return done(err);
+      });
+    });
+  });
+
+  it('t3-3 throw validation error when record added in Cust and CustAdd models using single POST operation- child model error', function (done) {
+    var customerData = {
+      'name': 'Himanshu',
+      'address':
+      {
+        'country': 'India'
+      }
+    };
+
+    var url = basePath + '/employees?access_token=' + adminToken;
+    api.set('Accept', 'application/json')
+      .post(url)
+      .send(customerData)
+      .end(function (err, response) {
+        expect(response.status).to.be.equal(422);
+        done();
+      });
+  });
+
+  it('t3-4 retrieve record to check no entry made in Cust and CustAdd model as validation error occurred', function (done) {
+    api.set('Accept', 'application/json')
+      .get(basePath + '/employees' + '?filter={"include" : "address"}')
+      .send()
+      .end(function (err, res) {
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        if(isTransactionSupported()) {
+          expect(res.status).to.be.equal(200);
+          var result = res.body;
+          expect(result).to.be.empty;
+        }
+        return done();
+      });
+  });
+
+  it('t3-5 throw validation error when record added in Cust and CustAdd models using single POST operation- parent model error', function (done) {
+    var customerData = {
+      'address':
+      {
+        'city': 'delhi',
+        'country': 'India'
+      }
+    };
+
+    var url = basePath + '/employees?access_token=' + adminToken;
+    api.set('Accept', 'application/json')
+      .post(url)
+      .send(customerData)
+      .end(function (err, response) {
+        expect(response.status).to.be.equal(422);
+        done();
+      });
+  });
+
+  it('t3-6 retrieve record to check no entry made in Cust and CustAdd model as validation error occurred', function (done) {
+    api.set('Accept', 'application/json')
+      .get(basePath + '/employees' + '?filter={"include" : "address"}')
+      .send()
+      .end(function (err, res) {
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        if(isTransactionSupported()) {
+          expect(res.status).to.be.equal(200);
+          var result = res.body;
+          expect(result).to.be.empty;
+        }
+        return done();
+      });
+  });
+
+  it('t3-7 Post a parent-child relation data', function (done) {
+    var customerData = {
+      'name': 'Himanshu',
+      'address':
+      {
+        'city': 'delhi'
+      }
+    };
+
+    var url = basePath + '/employees?access_token=' + adminToken;
+    api.set('Accept', 'application/json')
+      .post(url)
+      .send(customerData)
+      .end(function (err, response) {
+        expect(response.status).to.be.equal(200);
+        var result = response.body;
+        expect(result.name).to.be.equal('Himanshu');
+        expect(result.address.city).to.be.equal('delhi');
+        empId = result.id;
+        empAddId = result.address.id;
+        empName = result.name;
+        done();
+      });
+  });
+
+  it('t3-8 delete child record by passing row status as deleted', function (done) {
+    var sendData = {
+      'name': empName,
+      'id': empId,
+      'address':
+      {
+        'id': empAddId,
+        '__row_status': 'deleted'
+      }
+    };
+
+    var url = basePath + '/employees' + '/' + empId + '?access_token=' + adminToken;
+    api.set('Accept', 'application/json')
+      .put(url)
+      .send(sendData)
+      .end(function (err, response) {
+        expect(response.status).to.be.equal(200);
+        expect(response.body.address).to.be.undefined;
+        done();
+      });
+  });
+
+  it('t3-9 Post only parent data', function (done) {
+    var customerData = {
+      'name': 'Himanshu_K',
+    };
+
+    var url = basePath + '/employees?access_token=' + adminToken;
+    api.set('Accept', 'application/json')
+      .post(url)
+      .send(customerData)
+      .end(function (err, response) {
+        expect(response.status).to.be.equal(200);
+        var result = response.body;
+        expect(result.name).to.be.equal('Himanshu_K');
+        done();
+      });
+  });
+
+  it('t3-10 Update parent data', function (done) {
+    var customerData = {
+      'name': 'Himanshu_Ku',
+    };
+
+    var url = basePath + '/employees?access_token=' + adminToken;
+    api.set('Accept', 'application/json')
+      .put(url)
+      .send(customerData)
+      .end(function (err, response) {
+        expect(response.status).to.be.equal(200);
+        var result = response.body;
+        expect(result.name).to.be.equal('Himanshu_Ku');
+        empId = result.id;
+        done();
+      });
+  });
+
+  it('t3-11 update parent record by id', function (done) {
+    var sendData = {
+      'name': 'Himanshu_K',
+      'id': empId,
+    };
+
+    var url = basePath + '/employees' + '/' + empId + '?access_token=' + adminToken;
+    api.set('Accept', 'application/json')
+    .put(url)
+    .send(sendData)
+    .end(function (err, response) {
+      expect(response.status).to.be.equal(200);
+      var result = response.body;
+      expect(result.name).to.be.equal('Himanshu_K');
+      done();
+    });
+  });
+
+  it('t3-12 clean up Employee models', function (done) {
+    var Employee = loopback.getModel('Employee', defaultContext);
+    Employee.destroyAll({}, { ignoreAutoScope: true }, function (err) {
+      if (err) { return done(err); }
       var EmployeeAddress = loopback.getModel('EmployeeAddress', defaultContext);
       EmployeeAddress.destroyAll({}, { ignoreAutoScope: true }, function (err) {
         return done(err);
@@ -381,8 +576,8 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
           return (item.city === 'delhi modified');
         }).city).to.equal('delhi modified');
 
-        Customer.replaceOrCreate({name:"Smith", age: 40, id : "Smith", address : [{city : "SmithTown"}]}, function(err, inst){
-          if(err){
+        Customer.replaceOrCreate({ name: "Smith", age: 40, id: "Smith", address: [{ city: "SmithTown" }] }, function (err, inst) {
+          if (err) {
             return done(err);
           }
           expect(inst.name).to.be.equal("Smith");
@@ -700,11 +895,11 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
         'name': 'Smith'
       }
     },
-    globalCtx,
-    function (err, results) {
-      expect(results[0].name).to.equal('Smith');
-      done();
-    });
+      globalCtx,
+      function (err, results) {
+        expect(results[0].name).to.equal('Smith');
+        done();
+      });
   });
 
   it('t7-4 Composite Model test - 1 customer record should be updated, 1 address recourd should be updated', function (done) {
@@ -758,10 +953,10 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
         'name': 'Smith_Changed'
       }
     }, globalCtx,
-    function (err, results) {
-      expect(results[0].name).to.equal('Smith_Changed');
-      done();
-    });
+      function (err, results) {
+        expect(results[0].name).to.equal('Smith_Changed');
+        done();
+      });
   });
 
   it('t7-6 should get the CustomerAddress based on where condition', function (done) {
@@ -771,13 +966,13 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
         'city': 'DELHI_CAPITAL'
       }
     }, globalCtx,
-    function (err, results) {
-      expect(results[0].city).to.equal('DELHI_CAPITAL');
-      // console.log(results[0]);
-      expect(results[0].CustomerId.toString()).to.be.equal('1');
-      // expect(results[0].customerId === "1" || results[0].customerId === 1).to.be.ok;
-      done();
-    });
+      function (err, results) {
+        expect(results[0].city).to.equal('DELHI_CAPITAL');
+        // console.log(results[0]);
+        expect(results[0].CustomerId.toString()).to.be.equal('1');
+        // expect(results[0].customerId === "1" || results[0].customerId === 1).to.be.ok;
+        done();
+      });
   });
 
   it('t7-7 do Composite Get', function (done) {
@@ -807,10 +1002,10 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
         'password': 'pri1'
       }
     },
-    globalCtx, function (err, results) {
-      expect(err).to.be.null;
-      done();
-    });
+      globalCtx, function (err, results) {
+        expect(err).to.be.null;
+        done();
+      });
   });
 
   it('t7-10 should fail to insert data in Customer Enrollment Model', function (done) {
@@ -829,9 +1024,9 @@ describe(chalk.blue('Composite Model Test Started'), function (done) {
           'password': 'ArunArun'
         }]
     },
-    globalCtx, function (err, results) {
-      expect(err).not.to.be.null;
-      done();
-    });
+      globalCtx, function (err, results) {
+        expect(err).not.to.be.null;
+        done();
+      });
   });
 });

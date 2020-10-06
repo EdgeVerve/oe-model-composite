@@ -243,9 +243,6 @@ Consider an example of home page screen where you want to data from multiple mod
 * List of bank offers and promotions (coming from promotion model)
 * List of upcoming events like webinars (coming from upcomingEvents model )
 
-
-![compositemodel](http://10.73.53.167/ev/ev-foundation/uploads/adc714fba0425737a3c99a91f2ec4d2e/compositemodel.png)
-
 As shown above, customer has many accounts. Account has one accountBalance while each account having multiple transactions.
 There are unrelated models like promotion and upcomingEvents.
 If you want to construct home page with all this data from all the models shown above, you need to create composite. Specifically, it will be explicit composite model. We will show how this can be done in another section of ‘Using Composite’.
